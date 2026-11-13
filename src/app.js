@@ -1,12 +1,24 @@
 const express = require("express");
 const app = express();
 
-app.use("/charan", (req, res) => {
-  res.send("Hello, Charan!");
+app.get("/user", (req, res) => {
+  res.send("User page");
 });
 
-app.use("/not-found", (req, res) => {
-  res.send("404 Not Found");
+app.post("/user", (req, res) => {
+  res.send("User created");
+});
+
+app.put("/user", (req, res) => {
+  res.send("User updated");
+});
+
+app.patch("/user", (req, res) => {
+  res.send("User partially updated");
+});
+
+app.delete("/user", (req, res) => {
+  res.send("User deleted");
 });
 
 app.use("/", (req, res) => {
