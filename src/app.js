@@ -2,18 +2,49 @@ const express = require("express");
 const { connectDB } = require("./config/database");
 const app = express();
 const { Users } = require("./models/user");
+const { validateSignUpData } = require("./utils/validation");
+const bcrypt = require("bcrypt");
+const validator = require("validator");
 
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  const user = new Users(req.body);
-
   try {
+    validateSignUpData(req);
+
+    const { password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new Users({
+      ...req.body,
+      password: hashedPassword,
+    });
     await user.save();
     res.send("User created successfully");
   } catch (error) {
     console.error("Error creating user", error.message);
     res.status(400).send("Error creating user");
+  }
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+    if (validator.isEmail(emailId)) {
+      const user = await Users.findOne({ emailId });
+      if (!user) {
+        return res.status(404).send("Invalid credentials");
+      }
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).send("Invalid credentials");
+      }
+      res.send("Login successful");
+    } else {
+      res.status(400).send("Invalid email format");
+    }
+  } catch (error) {
+    console.error("Error logging in", error.message);
+    res.status(400).send("Error logging in");
   }
 });
 
