@@ -5,8 +5,12 @@ const { Users } = require("./models/user");
 const { validateSignUpData } = require("./utils/validation");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middlewares/auth");
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.post("/signup", async (req, res) => {
   try {
@@ -37,8 +41,13 @@ app.post("/login", async (req, res) => {
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         return res.status(400).send("Invalid credentials");
+      } else {
+        const token = jwt.sign({ _id: user._id }, "DEVTINDER@TOKEN", {
+          expiresIn: "7d",
+        });
+        res.cookie("token", token);
+        res.send("Login successful");
       }
-      res.send("Login successful");
     } else {
       res.status(400).send("Invalid email format");
     }
@@ -48,7 +57,23 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/user", async (req, res) => {
+app.get("/profile", userAuth, async (req, res) => {
+  try {
+    const user = req.user;
+    res.send(user);
+  } catch (error) {
+    console.error("Error fetching profile", error.message);
+    res.status(400).send("Error fetching profile");
+  }
+});
+
+app.post("/sendConnectionRequest", userAuth, async (req, res) => {
+  console.log("Received connection request:", req.body);
+
+  res.send("Connection request sent successfully");
+});
+
+app.get("/user", userAuth, async (req, res) => {
   const userEmail = req.body.emailId;
 
   try {
@@ -64,7 +89,7 @@ app.get("/user", async (req, res) => {
   }
 });
 
-app.get("/feed", async (req, res) => {
+app.get("/feed", userAuth, async (req, res) => {
   try {
     const users = await Users.find({});
     res.send(users);
@@ -74,7 +99,7 @@ app.get("/feed", async (req, res) => {
   }
 });
 
-app.delete("/user", async (req, res) => {
+app.delete("/user", userAuth, async (req, res) => {
   const userId = req.body.userId;
 
   try {
@@ -90,7 +115,7 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-app.patch("/user/:userId", async (req, res) => {
+app.patch("/user/:userId", userAuth, async (req, res) => {
   const userId = req.params?.userId;
   const updateData = req.body;
 
