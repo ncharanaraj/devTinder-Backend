@@ -59,11 +59,34 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-app.patch("/user", async (req, res) => {
-  const userId = req.body.userId;
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
   const updateData = req.body;
 
   try {
+    const allowedUpdates = [
+      "firstName",
+      "lastName",
+      "password",
+      "age",
+      "gender",
+      "photoUrl",
+      "about",
+      "skills",
+    ];
+
+    const isValidOperation = Object.keys(updateData).every((update) =>
+      allowedUpdates.includes(update),
+    );
+
+    if (!isValidOperation) {
+      return res.status(400).send("Invalid update fields");
+    }
+
+    if (updateData?.skills.length > 10) {
+      return res.status(400).send("Skills cannot exceed 10 items");
+    }
+
     const user = await Users.findByIdAndUpdate({ _id: userId }, updateData, {
       runValidators: true,
     });
