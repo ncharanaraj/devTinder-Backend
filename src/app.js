@@ -2,75 +2,19 @@ const express = require("express");
 const { connectDB } = require("./config/database");
 const app = express();
 const { Users } = require("./models/user");
-const { validateSignUpData } = require("./utils/validation");
-const bcrypt = require("bcrypt");
-const validator = require("validator");
 const cookieParser = require("cookie-parser");
 const { userAuth } = require("./middlewares/auth");
 
 app.use(express.json());
 app.use(cookieParser());
 
-app.post("/signup", async (req, res) => {
-  try {
-    validateSignUpData(req);
+const { authRoutes } = require("./routes/auth");
+const { requestRoutes } = require("./routes/request");
+const { profileRoutes } = require("./routes/profile");
 
-    const { password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new Users({
-      ...req.body,
-      password: hashedPassword,
-    });
-    await user.save();
-    res.send("User created successfully");
-  } catch (error) {
-    console.error("Error creating user", error.message);
-    res.status(400).send("Error creating user");
-  }
-});
-
-app.post("/login", async (req, res) => {
-  try {
-    const { emailId, password } = req.body;
-    if (validator.isEmail(emailId)) {
-      const user = await Users.findOne({ emailId });
-      if (!user) {
-        return res.status(404).send("Invalid credentials");
-      }
-      const isMatch = await user.validatePassword(password);
-      if (!isMatch) {
-        return res.status(400).send("Invalid credentials");
-      } else {
-        const token = await user.getJWT();
-        res.cookie("token", token, {
-          expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-        });
-        res.send("Login successful");
-      }
-    } else {
-      res.status(400).send("Invalid email format");
-    }
-  } catch (error) {
-    console.error("Error logging in", error.message);
-    res.status(400).send("Error logging in");
-  }
-});
-
-app.get("/profile", userAuth, async (req, res) => {
-  try {
-    const user = req.user;
-    res.send(user);
-  } catch (error) {
-    console.error("Error fetching profile", error.message);
-    res.status(400).send("Error fetching profile");
-  }
-});
-
-app.post("/sendConnectionRequest", userAuth, async (req, res) => {
-  console.log("Received connection request:", req.body);
-
-  res.send("Connection request sent successfully");
-});
+app.use("/", authRoutes);
+app.use("/", requestRoutes);
+app.use("/", profileRoutes);
 
 app.get("/user", userAuth, async (req, res) => {
   const userEmail = req.body.emailId;
@@ -122,7 +66,6 @@ app.patch("/user/:userId", userAuth, async (req, res) => {
     const allowedUpdates = [
       "firstName",
       "lastName",
-      "password",
       "age",
       "gender",
       "photoUrl",
