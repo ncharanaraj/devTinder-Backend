@@ -11,10 +11,12 @@ app.use(cookieParser());
 const { authRoutes } = require("./routes/auth");
 const { requestRoutes } = require("./routes/request");
 const { profileRoutes } = require("./routes/profile");
+const { userRouters } = require("./routes/user");
 
 app.use("/", authRoutes);
 app.use("/", requestRoutes);
 app.use("/", profileRoutes);
+app.use("/", userRouters);
 
 app.get("/user", userAuth, async (req, res) => {
   const userEmail = req.body.emailId;

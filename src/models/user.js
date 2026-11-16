@@ -107,6 +107,8 @@ userSchema.methods.validatePassword = async function (inputPassword) {
   return isPasswordMatch;
 };
 
+const USER_SAFE_DATA = "firstName lastName photoUrl about skills";
+
 const Users = mongoose.model("User", userSchema);
 
-module.exports = { Users };
+module.exports = { Users, USER_SAFE_DATA };
