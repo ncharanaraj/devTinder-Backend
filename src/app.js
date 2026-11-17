@@ -18,48 +18,6 @@ app.use("/", requestRoutes);
 app.use("/", profileRoutes);
 app.use("/", userRouters);
 
-app.get("/user", userAuth, async (req, res) => {
-  const userEmail = req.body.emailId;
-
-  try {
-    const user = await Users.findOne({ emailId: userEmail });
-    if (!user) {
-      res.status(404).send("User not found");
-    } else {
-      res.send(user);
-    }
-  } catch (error) {
-    console.error("Error fetching user", error.message);
-    res.status(400).send("Error fetching user");
-  }
-});
-
-app.get("/feed", userAuth, async (req, res) => {
-  try {
-    const users = await Users.find({});
-    res.send(users);
-  } catch (error) {
-    console.error("Error fetching feed", error.message);
-    res.status(400).send("Error fetching feed");
-  }
-});
-
-app.delete("/user", userAuth, async (req, res) => {
-  const userId = req.body.userId;
-
-  try {
-    const user = await Users.findByIdAndDelete({ _id: userId });
-    if (!user) {
-      res.status(404).send("User not found");
-    } else {
-      res.send("User deleted successfully");
-    }
-  } catch (error) {
-    console.error("Error deleting user", error.message);
-    res.status(400).send("Error deleting user");
-  }
-});
-
 app.patch("/user/:userId", userAuth, async (req, res) => {
   const userId = req.params?.userId;
   const updateData = req.body;
