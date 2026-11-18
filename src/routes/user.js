@@ -90,7 +90,7 @@ userRouters.get("/feed", userAuth, async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    res.json({ data: users });
+    res.json(users);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
