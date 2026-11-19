@@ -18,8 +18,17 @@ authRoutes.post("/signup", async (req, res) => {
       password: hashedPassword,
     });
 
-    await user.save();
-    res.send("User created successfully");
+    const savedUser = await user.save();
+
+    const token = await savedUser.getJWT();
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    });
+
+    res.json({
+      message: "User created successfully",
+      data: savedUser,
+    });
   } catch (error) {
     res.status(400).send("Error creating user", error.message);
   }
