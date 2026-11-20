@@ -5,6 +5,7 @@ const { Users } = require("./models/user");
 const cookieParser = require("cookie-parser");
 const { userAuth } = require("./middlewares/auth");
 const cors = require("cors");
+require("dotenv").config();
 
 app.use(
   cors({
@@ -69,7 +70,7 @@ app.patch("/user/:userId", userAuth, async (req, res) => {
 connectDB()
   .then(() => {
     console.log("MongoDB connected");
-    app.listen(3000, () => {
+    app.listen(process.env.PORT, () => {
       console.log("Server is running on port 3000");
     });
   })
