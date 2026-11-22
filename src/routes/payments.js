@@ -62,7 +62,7 @@ paymentRouters.post("/payment/webhook", async (req, res) => {
 
     const paymentDetails = req.body.payload.payment.entity;
 
-    const payment = await paymentModel.find({
+    const payment = await paymentModel.findOne({
       orderId: paymentDetails.order_id,
     });
     payment.paymentId = paymentDetails.id;
