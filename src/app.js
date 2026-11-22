@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const { userAuth } = require("./middlewares/auth");
 const cors = require("cors");
 require("dotenv").config();
+const { job } = require("./utils/cronjob");
 
 app.use(
   cors({
@@ -15,16 +16,19 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+job.start();
 
 const { authRoutes } = require("./routes/auth");
 const { requestRoutes } = require("./routes/request");
 const { profileRoutes } = require("./routes/profile");
 const { userRouters } = require("./routes/user");
+const { paymentRouters } = require("./routes/payments");
 
 app.use("/", authRoutes);
 app.use("/", requestRoutes);
 app.use("/", profileRoutes);
 app.use("/", userRouters);
+app.use("/", paymentRouters);
 
 app.patch("/user/:userId", userAuth, async (req, res) => {
   const userId = req.params?.userId;
