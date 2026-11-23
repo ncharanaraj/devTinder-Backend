@@ -48,8 +48,11 @@ requestRoutes.post(
       });
 
       const result = await connectionRequest.save();
-      
-      await sendEmail.run();
+
+      await sendEmail.run(
+        "Interested",
+        "Showing interset on you. Please, login to see the profile",
+      );
 
       res.json({
         message: "Connection request sent successfully!",

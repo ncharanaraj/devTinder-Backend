@@ -7,6 +7,7 @@ const { userAuth } = require("./middlewares/auth");
 const cors = require("cors");
 require("dotenv").config();
 const { job } = require("./utils/cronjob");
+const http = require("http");
 
 app.use(
   cors({
@@ -23,12 +24,18 @@ const { requestRoutes } = require("./routes/request");
 const { profileRoutes } = require("./routes/profile");
 const { userRouters } = require("./routes/user");
 const { paymentRouters } = require("./routes/payments");
+const { initializeSocket } = require("./utils/socket");
+const { chatRouters } = require("./routes/chat");
 
 app.use("/", authRoutes);
 app.use("/", requestRoutes);
 app.use("/", profileRoutes);
 app.use("/", userRouters);
 app.use("/", paymentRouters);
+app.use("/", chatRouters);
+
+const server = http.createServer(app);
+initializeSocket(server);
 
 app.patch("/user/:userId", userAuth, async (req, res) => {
   const userId = req.params?.userId;
@@ -74,7 +81,7 @@ app.patch("/user/:userId", userAuth, async (req, res) => {
 connectDB()
   .then(() => {
     console.log("MongoDB connected");
-    app.listen(process.env.PORT, () => {
+    server.listen(process.env.PORT, () => {
       console.log("Server is running on port 3000");
     });
   })
